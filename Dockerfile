@@ -16,10 +16,6 @@ ARG TARGETPLATFORM
 
 WORKDIR /app
 
-COPY go.mod go.sum ./
-
-RUN go mod download
-
 COPY . .
 
 RUN rm -rf ui/dist
@@ -27,13 +23,20 @@ RUN rm -rf ui/dist
 COPY --from=front-builder /app/ui/dist /app/ui/dist
 
 RUN --mount=type=cache,target=/root/.cache/go-build \
-  --mount=type=cache,target=/go/pkg \
-  case "$TARGETPLATFORM" in \
-  "linux/amd64") go build -o certimate ;; \
-  "linux/arm64") GOARCH=arm64 go build -o certimate ;; \
-  "linux/arm/v7") GOARCH=arm go build -o certimate ;; \
-  *) echo "Unsupported platform: $TARGETPLATFORM"; exit 1 ;; \
-  esac
+    --mount=type=cache,target=/go/pkg \
+    \
+    go mod download && \
+    \
+    if [ "$TARGETPLATFORM" = "linux/amd64" ]; then \
+        go build -o gogin ./cmd/main.go; \
+    elif [ "$TARGETPLATFORM" = "linux/arm64" ]; then \
+        GOARCH=arm64 go build -o gogin ./cmd/main.go; \
+    elif [ "$TARGETPLATFORM" = "linux/arm/v7" ]; then \
+        GOARCH=arm go build -o gogin ./cmd/main.go; \
+    else \
+        echo "Unsupported platform: $TARGETPLATFORM"; \
+        exit 1; \
+    fi
 
 FROM scratch
 
