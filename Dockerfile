@@ -23,20 +23,20 @@ RUN rm -rf ui/dist
 COPY --from=front-builder /app/ui/dist /app/ui/dist
 
 RUN --mount=type=cache,target=/root/.cache/go-build \
-  --mount=type=cache,target=/go/pkg \
-  \
-  go mod download && \
-  \
-  if [ "$TARGETPLATFORM" = "linux/amd64" ]; then \
-  go build -o certimate; \
-  elif [ "$TARGETPLATFORM" = "linux/arm64" ]; then \
-  GOARCH=arm64 go build -o certimate; \
-  elif [ "$TARGETPLATFORM" = "linux/arm/v7" ]; then \
-  GOARCH=arm go build -o certimate; \
-  else \
-  echo "Unsupported platform: $TARGETPLATFORM"; \
-  exit 1; \
-  fi
+    --mount=type=cache,target=/go/pkg \
+    \
+    go mod download && \
+    \
+    if [ "$TARGETPLATFORM" = "linux/amd64" ]; then \
+        go build -o certimate; \
+    elif [ "$TARGETPLATFORM" = "linux/arm64" ]; then \
+        GOARCH=arm64 go build -o certimate; \
+    elif [ "$TARGETPLATFORM" = "linux/arm/v7" ]; then \
+        GOARCH=arm go build -o certimate; \
+    else \
+        echo "Unsupported platform: $TARGETPLATFORM"; \
+        exit 1; \
+    fi
 
 FROM scratch
 
